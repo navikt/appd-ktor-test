@@ -1,3 +1,12 @@
+FROM busybox AS java-common
+
+RUN wget -O /dumb-init https://github.com/Yelp/dumb-init/releases/download/v1.2.1/dumb-init_1.2.1_amd64
+RUN chmod +x /dumb-init
+
+COPY init-scripts/ /init-scripts
+COPY entrypoint.sh /entrypoint.sh
+COPY run-java.sh /run-java.sh
+
 FROM debian AS builder
 
 ENV APPD_AGENT_VERSION="4.5.19.29348"
@@ -16,11 +25,10 @@ FROM openjdk:11-jdk-slim
 COPY --from=builder /tmp /opt/appdynamics
 
 COPY --from=builder /tmp /opt/appdynamics
-COPY init-scripts/ /init-scripts
-COPY entrypoint.sh /entrypoint.sh
-COPY run-java.sh /run-java.sh
-RUN wget -O /dumb-init https://github.com/Yelp/dumb-init/releases/download/v1.2.1/dumb-init_1.2.1_amd64
-RUN chmod +x /dumb-init
+COPY --from=java-common /init-scripts /init-scripts
+COPY --from=java-common /entrypoint.sh /entrypoint.sh
+COPY --from=java-common /run-java.sh /run-java.sh
+COPY --from=java-common /dumb-init /dumb-init
 
 RUN apt-get update && apt-get install -y wget locales
 
