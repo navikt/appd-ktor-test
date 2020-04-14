@@ -20,7 +20,7 @@ jobs:
           ORG_GRADLE_PROJECT_githubUser: x-access-token
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
       - name: Build docker image
-        run: docker build -t $IMAGE .
+        run: docker build --no-cache -t $IMAGE .
       - name: Login to Github package registry
         run: docker login docker.pkg.github.com -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
         env:
