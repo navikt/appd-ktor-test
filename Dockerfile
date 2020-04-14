@@ -1,18 +1,11 @@
-FROM busybox AS java-common
-
-RUN wget -O /dumb-init https://github.com/Yelp/dumb-init/releases/download/v1.2.1/dumb-init_1.2.1_amd64
-RUN chmod +x /dumb-init
-
-COPY init-scripts/ /init-scripts
-COPY entrypoint.sh /entrypoint.sh
-COPY run-java.sh /run-java.sh
-
 FROM debian AS builder
 
 ENV APPD_AGENT_VERSION="4.5.19.29348"
 ENV APPD_AGENT_SHA256="245fc140fdc619a5375012651f94ab4711a64b6e5ab9908e35fef56f082882c7"
 
-RUN apt-get update && apt-get install -y --no-install-recommends  unzip \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends  unzip \
+    && apt-get install -y wget \
 	&& rm -rf /var/lib/apt/lists/*
 
 COPY AppServerAgent-${APPD_AGENT_VERSION}.zip /
@@ -21,14 +14,21 @@ RUN echo "${APPD_AGENT_SHA256} *AppServerAgent-${APPD_AGENT_VERSION}.zip" >> app
     && rm appd_checksum \
     && unzip -oq AppServerAgent-${APPD_AGENT_VERSION}.zip -d /tmp
 
+RUN wget -O /dumb-init https://github.com/Yelp/dumb-init/releases/download/v1.2.1/dumb-init_1.2.1_amd64
+RUN chmod +x /dumb-init
+
+COPY init-scripts/ /init-scripts
+COPY entrypoint.sh /entrypoint.sh
+COPY run-java.sh /run-java.sh
+
 FROM openjdk:11-jdk-slim
 COPY --from=builder /tmp /opt/appdynamics
 
 COPY --from=builder /tmp /opt/appdynamics
-COPY --from=java-common /init-scripts /init-scripts
-COPY --from=java-common /entrypoint.sh /entrypoint.sh
-COPY --from=java-common /run-java.sh /run-java.sh
-COPY --from=java-common /dumb-init /dumb-init
+COPY --from=builder /init-scripts /init-scripts
+COPY --from=builder /entrypoint.sh /entrypoint.sh
+COPY --from=builder /run-java.sh /run-java.sh
+COPY --from=builder /dumb-init /dumb-init
 
 RUN apt-get update && apt-get install -y wget locales
 
