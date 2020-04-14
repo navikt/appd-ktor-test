@@ -1,3 +1,12 @@
+FROM busybox as java-common
+
+RUN wget -O /dumb-init https://github.com/Yelp/dumb-init/releases/download/v1.2.1/dumb-init_1.2.1_amd64
+RUN chmod +x /dumb-init
+
+COPY init-scripts/ /init-scripts
+COPY entrypoint.sh /entrypoint.sh
+COPY run-java.sh /run-java.sh
+
 FROM debian AS builder
 
 ENV APPD_AGENT_VERSION="4.5.19.29348"
@@ -11,8 +20,6 @@ RUN echo "${APPD_AGENT_SHA256} *AppServerAgent-${APPD_AGENT_VERSION}.zip" >> app
     && sha256sum -c appd_checksum \
     && rm appd_checksum \
     && unzip -oq AppServerAgent-${APPD_AGENT_VERSION}.zip -d /tmp
-
-FROM navikt/java:common AS java-common
 
 FROM openjdk:11-jdk-slim
 COPY --from=builder /tmp /opt/appdynamics
