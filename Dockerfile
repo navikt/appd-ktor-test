@@ -23,8 +23,6 @@ COPY run-java.sh /run-java.sh
 
 FROM openjdk:11-jdk-slim
 COPY --from=builder /tmp /opt/appdynamics
-
-COPY --from=builder /tmp /opt/appdynamics
 COPY --from=builder /init-scripts /init-scripts
 COPY --from=builder /entrypoint.sh /entrypoint.sh
 COPY --from=builder /run-java.sh /run-java.sh
