@@ -1,4 +1,4 @@
-FROM busybox as java-common
+FROM busybox AS java-common
 
 RUN wget -O /dumb-init https://github.com/Yelp/dumb-init/releases/download/v1.2.1/dumb-init_1.2.1_amd64
 RUN chmod +x /dumb-init
