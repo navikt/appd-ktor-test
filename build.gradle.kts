@@ -17,7 +17,7 @@ version = "0.0.1-SNAPSHOT"
 val githubUser: String by project
 val githubPassword: String by project
 
-val mainClass = "no.nav.medlemskap.ApplicationKt"
+val mainClass = "no.nav.appd.ApplicationKt"
 
 repositories {
     jcenter()
